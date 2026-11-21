@@ -4,9 +4,16 @@
 
 export const site = {
   name: 'Southwest Home Maintenance',
-  tagline: 'One less thing to worry about.',
+
+  // ------- Search focus -------
+  // The whole site is built around one phrase. It leads the page title, the meta
+  // description and the homepage H1, so keep these three in step if it ever changes.
+  keyword: 'Home maintenance made easy',
+  tagline: 'Home maintenance made easy.',
+  promise: 'One less thing to worry about.',
+  title: 'Home Maintenance Made Easy in Las Vegas | Southwest Home Maintenance',
   description:
-    'Home maintenance plans for the Las Vegas Valley. We visit on a regular schedule and handle the small upkeep: air filters, light bulbs, alarm batteries, leak checks and more.',
+    'Home maintenance made easy for Las Vegas, Henderson and Summerlin. We visit on a schedule and handle air filters, light bulbs, alarm batteries and leak checks.',
 
   // ------- Contact (PLACEHOLDER: 555 numbers are not real) -------
   phoneDisplay: '(702) 555-0100',

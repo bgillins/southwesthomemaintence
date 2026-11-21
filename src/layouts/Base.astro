@@ -1,6 +1,7 @@
 ---
 // ------- Base layout -------
-// Wraps every page: <head> tags, global styles, header and footer.
+// Wraps every page: <head> tags (title, description, link previews, search data),
+// global styles, header and footer.
 import '../styles/global.css';
 import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
@@ -11,8 +12,26 @@ interface Props {
   description?: string;
 }
 
-const { title = `${site.name} | Home maintenance plans in Las Vegas`, description = site.description } =
-  Astro.props;
+const { title = site.title, description = site.description } = Astro.props;
+
+// ------- Absolute URLs -------
+// Only available once `site` is set in astro.config.mjs. Search engines and link
+// previews want full URLs, so the canonical tag is skipped until then.
+const canonical = Astro.site ? new URL(Astro.url.pathname, Astro.site).href : null;
+const shareImage = Astro.site ? new URL('/og-image.jpg', Astro.site).href : '/og-image.jpg';
+
+// ------- Structured data -------
+// Tells search engines, in their own format, what the business is and where it works.
+const business = {
+  '@context': 'https://schema.org',
+  '@type': 'LocalBusiness',
+  name: site.name,
+  slogan: site.tagline,
+  description,
+  telephone: site.phoneHref.replace('tel:', ''),
+  areaServed: site.areas.map((area) => ({ '@type': 'City', name: `${area}, NV` })),
+  ...(canonical ? { url: Astro.site?.href, image: shareImage } : {}),
+};
 ---
 
 <!doctype html>
@@ -20,17 +39,27 @@ const { title = `${site.name} | Home maintenance plans in Las Vegas`, descriptio
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <!-- ------- Search result title and description ------- -->
     <title>{title}</title>
     <meta name="description" content={description} />
+    {canonical && <link rel="canonical" href={canonical} />}
+
     <meta name="theme-color" content="#06243a" />
     <link rel="icon" type="image/png" href="/favicon.png" />
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
 
-    <!-- ------- Link previews (Facebook, text messages) ------- -->
+    <!-- ------- Link previews (Facebook, text messages, X) ------- -->
     <meta property="og:type" content="website" />
+    <meta property="og:site_name" content={site.name} />
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
-    <meta property="og:image" content="/og-image.jpg" />
+    <meta property="og:image" content={shareImage} />
+    <meta property="og:image:alt" content={`${site.name}: ${site.tagline}`} />
+    {canonical && <meta property="og:url" content={canonical} />}
+    <meta name="twitter:card" content="summary_large_image" />
+
+    <script type="application/ld+json" is:inline set:html={JSON.stringify(business)} />
   </head>
   <body>
     <a class="skip" href="#main">Skip to main content</a>

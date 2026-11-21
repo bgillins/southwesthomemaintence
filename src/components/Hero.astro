@@ -26,8 +26,9 @@ const points = ['The same technician every visit', 'A photo report after each vi
   <div class="wrap grid">
     <!-- ------- Promise and actions ------- -->
     <div class="copy">
-      <p class="eyebrow">Home maintenance plans · Las Vegas Valley</p>
-      <h1>One less thing to worry about.</h1>
+      <p class="eyebrow">{site.areas.join(' · ')}</p>
+      <h1>{site.tagline}</h1>
+      <p class="promise">{site.promise}</p>
       <p class="lead">
         We come to your home on a regular schedule and take care of the small upkeep most houses go
         without: air filters, light bulbs, alarm batteries, leak checks and more. Your home stays in
@@ -111,9 +112,31 @@ const points = ['The same technician every visit', 'A photo report after each vi
   }
 
   /* ------- Copy ------- */
+  /* Sized so the headline breaks as "Home maintenance / made easy." */
+  h1 {
+    font-size: clamp(2.5rem, 5.2vw, 3.75rem);
+  }
+
+  /* Keeps the three city names on one line on phones */
+  @media (max-width: 40rem) {
+    .eyebrow {
+      font-size: 0.8125rem;
+      letter-spacing: 0.06em;
+    }
+  }
+
+  .promise {
+    margin-top: 0.875rem;
+    font-family: var(--font-heading);
+    font-size: clamp(1.5rem, 3vw, 2rem);
+    font-weight: 600;
+    line-height: 1.2;
+    color: var(--olive-dark);
+  }
+
   .lead {
     max-width: 36rem;
-    margin-top: 1.5rem;
+    margin-top: 1.25rem;
     font-size: clamp(1.1875rem, 2vw, 1.375rem);
     line-height: 1.55;
     color: var(--navy-muted);

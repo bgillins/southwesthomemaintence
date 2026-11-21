@@ -25,13 +25,26 @@ const faqs = [
     a: `${site.region.charAt(0).toUpperCase()}${site.region.slice(1)}, including ${site.areas.join(', ')}. If you're nearby and not sure, call us and we'll tell you.`,
   },
 ];
+
+// Same questions and answers in the format search engines read
+const faqSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'FAQPage',
+  mainEntity: faqs.map((faq) => ({
+    '@type': 'Question',
+    name: faq.q,
+    acceptedAnswer: { '@type': 'Answer', text: faq.a },
+  })),
+};
 ---
+
+<script type="application/ld+json" is:inline set:html={JSON.stringify(faqSchema)} />
 
 <section class="section section--white" id="faq">
   <div class="wrap narrow">
     <div class="section-head">
       <p class="eyebrow">Common questions</p>
-      <h2>Good to know</h2>
+      <h2>Home maintenance questions</h2>
     </div>
 
     <div class="list">
