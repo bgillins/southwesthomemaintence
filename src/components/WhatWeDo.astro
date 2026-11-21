@@ -2,6 +2,7 @@
 // ------- What we take care of -------
 // The core checklist in plain words. Each item is a job people tend to put off.
 import Icon from './Icon.astro';
+import { totalItems } from '../data/checklist';
 
 const items = [
   {
@@ -73,6 +74,10 @@ const items = [
         ))
       }
     </ul>
+
+    <p class="more">
+      <a class="btn btn--outline" href="/checklist">See the full checklist: {totalItems} tasks</a>
+    </p>
   </div>
 </section>
 
@@ -115,6 +120,10 @@ const items = [
     border-radius: 50%;
     background: var(--cream);
     color: var(--olive-dark);
+  }
+
+  .more {
+    margin-top: 3rem;
   }
 
   .item p {

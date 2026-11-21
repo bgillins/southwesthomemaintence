@@ -1,0 +1,472 @@
+---
+// ------- Checklist page -------
+// Every task we perform, by area of the home, with the three plans side by side.
+// All content comes from src/data/checklist.ts; edit that file to change this page.
+import Base from '../layouts/Base.astro';
+import { checklist, visitExtras, referred, totalItems, FREQ } from '../data/checklist';
+import { plans } from '../data/plans';
+import { site } from '../data/site';
+
+// How many of the tasks each plan includes (add-ons and "not included" don't count)
+const includedCount = plans.map(
+  (_, tier) =>
+    checklist.flatMap((category) => category.items).filter((item) => !['addon', 'none'].includes(item.tiers[tier]))
+      .length,
+);
+
+const title = `Home Maintenance Checklist: ${totalItems} Tasks We Handle | ${site.name}`;
+const description = `Our full home maintenance checklist for Las Vegas Valley homes: ${totalItems} tasks across plumbing, heating and cooling, electrical, irrigation, the garage and more, compared plan by plan.`;
+---
+
+<Base title={title} description={description}>
+  <!-- ------- Intro ------- -->
+  <section class="intro">
+    <div class="wrap">
+      <p class="eyebrow">Home maintenance made easy</p>
+      <h1>Our home maintenance checklist</h1>
+      <p class="lead">
+        Making home maintenance easy starts with knowing exactly what gets done. Here are all{' '}
+        {totalItems} tasks, grouped by area of the home, with how often each plan covers them.
+      </p>
+
+      <!-- Plan summary -->
+      <ul class="plans">
+        {
+          plans.map((plan, tier) => (
+            <li>
+              <p class="plan-name">{plan.name}</p>
+              <p class="plan-meta">
+                ${plan.price} a month · {plan.visits}
+              </p>
+              <p class="plan-count">
+                <strong>{includedCount[tier]}</strong> of {totalItems} tasks
+              </p>
+            </li>
+          ))
+        }
+      </ul>
+
+      <!-- Key to the two kinds of task -->
+      <ul class="key">
+        <li><span class="kind kind--do">We do it</span> We carry out the task for you.</li>
+        <li>
+          <span class="kind kind--check">We check it</span> We look it over and tell you what we found.
+        </li>
+      </ul>
+
+      <!-- Jump links -->
+      <nav class="jump" aria-label="Checklist sections">
+        {checklist.map((category) => <a href={`#${category.id}`}>{category.title}</a>)}
+      </nav>
+    </div>
+  </section>
+
+  <!-- ------- One table per area of the home ------- -->
+  <section class="section section--white lists">
+    <div class="wrap">
+      {
+        checklist.map((category) => (
+          <section class="category" id={category.id}>
+            <h2>{category.title}</h2>
+            {category.intro && <p class="category-intro">{category.intro}</p>}
+
+            <table>
+              <thead>
+                <tr>
+                  <th scope="col">Task</th>
+                  {plans.map((plan) => <th scope="col">{plan.name}</th>)}
+                </tr>
+              </thead>
+              <tbody>
+                {category.items.map((item) => (
+                  <tr>
+                    <th scope="row">
+                      <span class="name">{item.name}</span>
+                      {item.detail && <span class="detail">{item.detail}</span>}
+                      <span class={`kind kind--${item.kind}`}>{item.kind === 'do' ? 'We do it' : 'We check it'}</span>
+                    </th>
+                    {item.tiers.map((freq, tier) => (
+                      <td data-label={plans[tier].name}>
+                        <span class={`freq freq--${freq}`}>{FREQ[freq].label}</span>
+                      </td>
+                    ))}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </section>
+        ))
+      }
+
+      <!-- ------- What comes with the visit itself ------- -->
+      <section class="category" id="every-visit">
+        <h2>With your visits</h2>
+        <table>
+          <thead>
+            <tr>
+              <th scope="col">Included</th>
+              {plans.map((plan) => <th scope="col">{plan.name}</th>)}
+            </tr>
+          </thead>
+          <tbody>
+            {
+              visitExtras.map((extra) => (
+                <tr>
+                  <th scope="row">
+                    <span class="name">{extra.name}</span>
+                  </th>
+                  {extra.tiers.map((text, tier) => (
+                    <td data-label={plans[tier].name}>
+                      <span class="freq">{text}</span>
+                    </td>
+                  ))}
+                </tr>
+              ))
+            }
+          </tbody>
+        </table>
+      </section>
+    </div>
+  </section>
+
+  <!-- ------- What we don't do ------- -->
+  <section class="section">
+    <div class="wrap narrow">
+      <p class="eyebrow">Maintenance, not repairs</p>
+      <h2>What we leave to licensed professionals</h2>
+      <p class="lead">
+        We're not a handyman or repair service. When we spot one of these, we show you what we found and can
+        connect you with a licensed professional we trust.
+      </p>
+      <ul class="referred">
+        {referred.map((line) => <li>{line}</li>)}
+      </ul>
+    </div>
+  </section>
+
+  <!-- ------- Next step ------- -->
+  <section class="section section--navy cta">
+    <div class="wrap">
+      <h2>Ready to hand off the list?</h2>
+      <p>Every plan starts with a Home Health Assessment.</p>
+      <div class="cta-buttons">
+        <a class="btn btn--gold" href="/#plans">See plans and pricing</a>
+        <a class="btn btn--light" href={site.phoneHref}>Call {site.phoneDisplay}</a>
+      </div>
+    </div>
+  </section>
+</Base>
+
+<style>
+  /* ------- Intro ------- */
+  .intro {
+    padding-block: clamp(2.5rem, 6vw, 4.5rem) clamp(2rem, 5vw, 3.5rem);
+  }
+
+  h1 {
+    font-size: clamp(2.25rem, 5vw, 3.5rem);
+  }
+
+  .lead {
+    max-width: 44rem;
+    margin-top: 1.25rem;
+    font-size: clamp(1.125rem, 2vw, 1.3125rem);
+    color: var(--navy-muted);
+  }
+
+  /* Three plan summary boxes */
+  .plans {
+    display: grid;
+    gap: 1rem;
+    margin: 2.25rem 0 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  @media (min-width: 44rem) {
+    .plans {
+      grid-template-columns: repeat(3, 1fr);
+    }
+  }
+
+  .plans li {
+    padding: 1.25rem 1.5rem;
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    background: var(--white);
+  }
+
+  .plan-name {
+    font-family: var(--font-heading);
+    font-size: 1.5rem;
+    font-weight: 650;
+  }
+
+  .plan-meta {
+    font-size: 1rem;
+    color: var(--navy-muted);
+  }
+
+  .plan-count {
+    margin-top: 0.5rem;
+  }
+
+  .plan-count strong {
+    font-family: var(--font-heading);
+    font-size: 1.75rem;
+  }
+
+  /* Key */
+  .key {
+    display: grid;
+    gap: 0.5rem;
+    margin: 2rem 0 0;
+    padding: 0;
+    list-style: none;
+    font-size: 1.0625rem;
+  }
+
+  .key .kind {
+    margin: 0 0.5rem 0 0;
+  }
+
+  /* Jump links */
+  .jump {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-top: 2rem;
+  }
+
+  .jump a {
+    padding: 0.5rem 0.95rem;
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    background: var(--white);
+    font-size: 0.9375rem;
+    font-weight: 600;
+    text-decoration: none;
+  }
+
+  .jump a:hover {
+    border-color: var(--navy);
+  }
+
+  /* ------- Category tables ------- */
+  .lists {
+    padding-top: clamp(2.5rem, 6vw, 4rem);
+  }
+
+  .category + .category {
+    margin-top: clamp(3rem, 7vw, 4.5rem);
+  }
+
+  .category h2 {
+    font-size: clamp(1.75rem, 3.5vw, 2.25rem);
+  }
+
+  .category-intro {
+    margin-top: 0.5rem;
+    color: var(--navy-muted);
+  }
+
+  table {
+    width: 100%;
+    margin-top: 1.25rem;
+    border-collapse: collapse;
+  }
+
+  thead th {
+    padding: 0.75rem 1rem;
+    background: var(--navy);
+    color: var(--cream);
+    font-size: 0.9375rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-align: center;
+  }
+
+  thead th:first-child {
+    border-radius: 0.625rem 0 0 0.625rem;
+    text-align: left;
+  }
+
+  thead th:last-child {
+    border-radius: 0 0.625rem 0.625rem 0;
+  }
+
+  tbody tr {
+    border-bottom: 1px solid var(--line);
+  }
+
+  tbody th,
+  tbody td {
+    padding: 1rem;
+    vertical-align: top;
+  }
+
+  tbody th {
+    width: 46%;
+    padding-left: 0;
+    font-weight: 400;
+    text-align: left;
+  }
+
+  tbody td {
+    width: 18%;
+    text-align: center;
+  }
+
+  .name {
+    display: block;
+    font-weight: 700;
+  }
+
+  .detail {
+    display: block;
+    margin-top: 0.15rem;
+    font-size: 1rem;
+    line-height: 1.5;
+    color: var(--navy-muted);
+  }
+
+  /* "We do it" / "We check it" tag */
+  .kind {
+    display: inline-block;
+    margin-top: 0.5rem;
+    padding: 0.1rem 0.6rem;
+    border-radius: 999px;
+    font-size: 0.8125rem;
+    font-weight: 700;
+    white-space: nowrap;
+  }
+
+  .kind--do {
+    background: var(--olive-tint);
+    color: var(--olive-ink);
+  }
+
+  .kind--check {
+    background: var(--navy-tint);
+    color: var(--navy-muted);
+  }
+
+  /* How often: every-visit and add-on get a tinted pill, the rest are plain text */
+  .freq {
+    display: inline-block;
+    font-size: 1rem;
+    font-weight: 600;
+    line-height: 1.3;
+  }
+
+  .freq--visit,
+  .freq--addon {
+    padding: 0.3rem 0.75rem;
+    border-radius: 999px;
+  }
+
+  .freq--visit {
+    background: var(--olive-tint);
+    color: var(--olive-ink);
+  }
+
+  .freq--addon {
+    background: var(--gold-tint);
+    color: var(--gold-ink);
+  }
+
+  .freq--none {
+    font-weight: 500;
+    color: var(--navy-muted);
+  }
+
+  /* ------- Phones: each task becomes a card with the three plans beneath it ------- */
+  @media (max-width: 47.99rem) {
+    thead {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      overflow: hidden;
+      clip-path: inset(50%);
+    }
+
+    table,
+    tbody {
+      display: block;
+    }
+
+    tbody tr {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 0.75rem 0.5rem;
+      padding-block: 1.125rem;
+    }
+
+    tbody th,
+    tbody td {
+      width: auto;
+      padding: 0;
+    }
+
+    tbody th {
+      grid-column: 1 / -1;
+    }
+
+    tbody td::before {
+      content: attr(data-label);
+      display: block;
+      margin-bottom: 0.25rem;
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--navy-muted);
+    }
+
+    .freq {
+      font-size: 0.875rem;
+    }
+
+    .freq--visit,
+    .freq--addon {
+      padding: 0.2rem 0.55rem;
+    }
+  }
+
+  /* ------- Referred work ------- */
+  .narrow {
+    max-width: 52rem;
+  }
+
+  .referred {
+    display: grid;
+    gap: 0.625rem 2rem;
+    margin: 2rem 0 0;
+    padding-left: 1.25rem;
+  }
+
+  @media (min-width: 44rem) {
+    .referred {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+
+  /* ------- Closing call to action ------- */
+  .cta {
+    text-align: center;
+  }
+
+  .cta p {
+    margin-top: 0.75rem;
+    font-size: 1.25rem;
+    color: var(--cream-muted);
+  }
+
+  .cta-buttons {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.875rem;
+    margin-top: 2rem;
+  }
+</style>

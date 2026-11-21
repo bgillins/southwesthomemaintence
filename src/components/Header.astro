@@ -6,11 +6,12 @@ import logo from '../assets/brand/logo.png';
 import Icon from './Icon.astro';
 import { site } from '../data/site';
 
+// Section links start with "/" so they also work from pages other than the homepage
 const links = [
-  { href: '#what-we-do', label: 'What we do' },
-  { href: '#how-it-works', label: 'How it works' },
-  { href: '#plans', label: 'Plans' },
-  { href: '#faq', label: 'Questions' },
+  { href: '/checklist', label: 'Checklist' },
+  { href: '/#how-it-works', label: 'How it works' },
+  { href: '/#plans', label: 'Plans' },
+  { href: '/#faq', label: 'Questions' },
 ];
 ---
 
@@ -30,7 +31,7 @@ const links = [
         <span class="call-label">Call</span>
         <span class="call-number">{site.phoneDisplay}</span>
       </a>
-      <a class="btn btn--gold start" href="#get-started">Get started</a>
+      <a class="btn btn--gold start" href="/#get-started">Get started</a>
     </div>
   </div>
 </header>

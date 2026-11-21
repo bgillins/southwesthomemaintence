@@ -17,6 +17,11 @@
   --gold-dark: #d48e0c; /* hover state for gold buttons */
   --line: #e3dccb; /* borders on cream and white */
   --cream-muted: #c9d3da; /* secondary text on navy */
+  --olive-tint: #eaf1d8; /* soft olive background for tags and success notes */
+  --olive-ink: #33490a; /* text on olive tint */
+  --gold-tint: #fdf0d5; /* soft gold background for tags and notices */
+  --gold-ink: #5c3d00; /* text on gold tint */
+  --navy-tint: #e8ecef; /* soft navy background for neutral tags */
 
   --font-heading: 'Fraunces Variable', Georgia, 'Times New Roman', serif;
   --font-body: 'Montserrat Variable', 'Helvetica Neue', Arial, sans-serif;
@@ -206,6 +211,17 @@ svg {
 .btn--outline:hover {
   background: var(--navy);
   color: var(--cream);
+}
+
+/* Outline button for navy backgrounds */
+.btn--light {
+  border-color: var(--cream);
+  color: var(--cream);
+}
+
+.btn--light:hover {
+  background: var(--cream);
+  color: var(--navy);
 }
 
 .btn--block {
