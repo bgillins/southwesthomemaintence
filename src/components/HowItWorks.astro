@@ -1,0 +1,79 @@
+---
+// ------- How it works -------
+// Three steps from first visit to routine.
+import { assessment } from '../data/plans';
+
+const steps = [
+  {
+    title: `Start with a ${assessment.name}`,
+    text: `We spend about ${assessment.minutes} minutes walking the home with you and noting what it needs: filter sizes, bulb types, the age of your equipment, where the shutoffs are. The visit is $${assessment.price}, credited toward your first month.`,
+  },
+  {
+    title: 'Pick the plan that fits',
+    text: 'Choose how often we visit: four, six or twelve times a year. You can talk it through with us after the assessment.',
+  },
+  {
+    title: 'We show up, on schedule',
+    text: 'The same technician comes at your regular day and time, works through the checklist, and sends you a photo report of what was done and anything worth keeping an eye on.',
+  },
+];
+---
+
+<section class="section section--white" id="how-it-works">
+  <div class="wrap">
+    <div class="section-head">
+      <p class="eyebrow">How it works</p>
+      <h2>Three steps, then it runs itself</h2>
+    </div>
+
+    <ol class="steps">
+      {
+        steps.map((step, index) => (
+          <li class="step">
+            <span class="number" aria-hidden="true">
+              {index + 1}
+            </span>
+            <h3>{step.title}</h3>
+            <p>{step.text}</p>
+          </li>
+        ))
+      }
+    </ol>
+  </div>
+</section>
+
+<style>
+  .steps {
+    display: grid;
+    gap: 2.5rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  @media (min-width: 56rem) {
+    .steps {
+      grid-template-columns: repeat(3, 1fr);
+      gap: 3rem;
+    }
+  }
+
+  .number {
+    display: grid;
+    place-items: center;
+    width: 3.25rem;
+    height: 3.25rem;
+    margin-bottom: 1.125rem;
+    border-radius: 50%;
+    background: var(--navy);
+    color: var(--gold);
+    font-family: var(--font-heading);
+    font-size: 1.5rem;
+    font-weight: 700;
+  }
+
+  .step p {
+    margin-top: 0.5rem;
+    color: var(--navy-muted);
+  }
+</style>

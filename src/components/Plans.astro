@@ -1,0 +1,203 @@
+---
+// ------- Plans -------
+// Three plan cards built from src/data/plans.ts. Each button jumps to the sign-up
+// form and (via data-plan) pre-selects that plan in the form's dropdown.
+import Icon from './Icon.astro';
+import { plans, assessment } from '../data/plans';
+---
+
+<section class="section" id="plans">
+  <div class="wrap">
+    <div class="section-head">
+      <p class="eyebrow">Plans and pricing</p>
+      <h2>Choose how often we visit</h2>
+      <p>
+        Every plan includes the full checklist on every visit. The difference is how often we come
+        and how much time we spend.
+      </p>
+    </div>
+
+    <ul class="cards">
+      {
+        plans.map((plan) => (
+          <li class:list={['card', { 'card--featured': plan.featured }]}>
+            <h3>{plan.name}</h3>
+            <p class="summary">{plan.summary}</p>
+
+            <p class="price">
+              <span class="amount">${plan.price}</span>
+              <span class="per">a month</span>
+            </p>
+            <p class="visits">
+              {plan.visits}
+              <span>{plan.length}</span>
+            </p>
+
+            <ul class="features">
+              {plan.features.map((feature) => (
+                <li>
+                  <Icon name="check" size={20} />
+                  <span>{feature}</span>
+                </li>
+              ))}
+            </ul>
+
+            <a
+              class:list={['btn', 'btn--block', plan.featured ? 'btn--gold' : 'btn--navy']}
+              href="#get-started"
+              data-plan={plan.id}
+            >
+              Choose {plan.name}
+            </a>
+          </li>
+        ))
+      }
+    </ul>
+
+    <p class="fine">
+      All plans begin with a ${assessment.price} {assessment.name}, credited toward your first
+      month.
+    </p>
+
+    <!-- ------- What the service is and is not ------- -->
+    <div class="scope">
+      <h3>Maintenance, not repairs</h3>
+      <p>
+        We're not a handyman or repair service. We handle the routine upkeep. If we spot something
+        that needs a licensed professional, we'll show you what we found and can connect you with
+        one we trust. What happens next is always your decision.
+      </p>
+    </div>
+  </div>
+</section>
+
+<style>
+  .cards {
+    display: grid;
+    gap: 1.5rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  @media (min-width: 60rem) {
+    .cards {
+      grid-template-columns: repeat(3, 1fr);
+      align-items: stretch;
+    }
+  }
+
+  /* ------- Card ------- */
+  .card {
+    display: flex;
+    flex-direction: column;
+    padding: 2rem 1.75rem;
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    background: var(--white);
+  }
+
+  .card h3 {
+    font-size: 1.75rem;
+  }
+
+  .summary {
+    margin-top: 0.375rem;
+    min-height: 3.3em; /* keeps prices aligned across cards */
+    color: var(--navy-muted);
+  }
+
+  .price {
+    display: flex;
+    align-items: baseline;
+    gap: 0.5rem;
+    margin-top: 1.25rem;
+  }
+
+  .amount {
+    font-family: var(--font-heading);
+    font-size: 3.25rem;
+    font-weight: 700;
+    line-height: 1;
+  }
+
+  .per {
+    font-weight: 600;
+    color: var(--navy-muted);
+  }
+
+  .visits {
+    margin-top: 0.5rem;
+    font-weight: 700;
+  }
+
+  .visits span {
+    display: block;
+    font-weight: 500;
+  }
+
+  .features {
+    display: grid;
+    gap: 0.75rem;
+    flex: 1;
+    align-content: start;
+    margin: 1.5rem 0 2rem;
+    padding: 1.5rem 0 0;
+    border-top: 1px solid var(--line);
+    list-style: none;
+    font-size: 1.0625rem;
+    line-height: 1.45;
+  }
+
+  .features li {
+    display: flex;
+    gap: 0.625rem;
+  }
+
+  .features :global(svg) {
+    margin-top: 0.15rem;
+    color: var(--olive);
+  }
+
+  /* ------- Featured card: navy with gold accents ------- */
+  .card--featured {
+    border-color: var(--navy);
+    background: var(--navy);
+    color: var(--cream);
+    box-shadow: var(--shadow);
+  }
+
+  .card--featured .summary,
+  .card--featured .per {
+    color: var(--cream-muted);
+  }
+
+  .card--featured .features {
+    border-top-color: rgb(247 243 232 / 0.2);
+  }
+
+  .card--featured .features :global(svg) {
+    color: var(--gold);
+  }
+
+  /* ------- Notes below the cards ------- */
+  .fine {
+    margin-top: 1.5rem;
+    text-align: center;
+    color: var(--navy-muted);
+  }
+
+  .scope {
+    max-width: 48rem;
+    margin: 3rem auto 0;
+    padding: 1.75rem 2rem;
+    border-left: 5px solid var(--olive);
+    border-radius: 0 var(--radius) var(--radius) 0;
+    background: var(--white);
+  }
+
+  .scope p {
+    margin-top: 0.5rem;
+    color: var(--navy-muted);
+  }
+</style>

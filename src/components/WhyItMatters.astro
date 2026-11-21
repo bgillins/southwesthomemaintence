@@ -1,0 +1,74 @@
+---
+// ------- Why regular upkeep pays off -------
+// The reasoning behind the service: longer life, better performance, fewer surprises, less hassle.
+const reasons = [
+  {
+    title: 'Things last longer',
+    text: 'Equipment that is kept clean and checked wears more slowly. Less dust and strain means fewer early replacements.',
+  },
+  {
+    title: 'Things work better',
+    text: "The U.S. Department of Energy says replacing a clogged air filter with a clean one can lower an air conditioner's energy use by 5 to 15 percent.",
+  },
+  {
+    title: 'Small problems stay small',
+    text: "A slow drip under a sink is a quick fix when it's caught early, and a ruined cabinet when it isn't.",
+  },
+  {
+    title: 'Nothing to remember',
+    text: 'No filter sizes to look up, no ladder to drag out, no list on the fridge. We keep the schedule and do the work.',
+  },
+];
+---
+
+<section class="section" id="why">
+  <div class="wrap">
+    <div class="section-head">
+      <p class="eyebrow">Why it matters</p>
+      <h2>A home that's looked after costs less and lasts longer</h2>
+    </div>
+
+    <ol class="grid">
+      {
+        reasons.map((reason) => (
+          <li class="reason">
+            <h3>{reason.title}</h3>
+            <p>{reason.text}</p>
+          </li>
+        ))
+      }
+    </ol>
+  </div>
+</section>
+
+<style>
+  .grid {
+    display: grid;
+    gap: 2rem 3rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  @media (min-width: 48rem) {
+    .grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+
+  /* Gold rule above each reason, like the rules beside "HOME MAINTENANCE" in the logo */
+  .reason {
+    padding-top: 1.25rem;
+    border-top: 3px solid var(--gold);
+  }
+
+  .reason h3 {
+    font-size: 1.625rem;
+  }
+
+  .reason p {
+    margin-top: 0.5rem;
+    max-width: 32rem;
+    color: var(--navy-muted);
+  }
+</style>

@@ -1,0 +1,255 @@
+---
+// ------- Hero -------
+// The promise in one line, the two main actions, and a sample visit report
+// so visitors can see what they actually get after each visit.
+import Icon from './Icon.astro';
+import { site } from '../data/site';
+
+// Sample report rows. "ok" shows an olive check, "watch" shows a gold dot.
+const report = [
+  { item: 'Air filters replaced', status: 'ok' },
+  { item: 'Smoke and CO alarms tested', status: 'ok' },
+  { item: 'Oven light replaced', status: 'ok' },
+  { item: 'Under-sink leak check: all dry', status: 'ok' },
+  { item: 'Water softener salt topped off', status: 'ok' },
+  {
+    item: 'Garage door bottom seal',
+    status: 'watch',
+    note: 'Starting to crack. We will check it again next visit.',
+  },
+];
+
+const points = ['The same technician every visit', 'A photo report after each visit', 'No lists to keep'];
+---
+
+<section class="hero">
+  <div class="wrap grid">
+    <!-- ------- Promise and actions ------- -->
+    <div class="copy">
+      <p class="eyebrow">Home maintenance plans · Las Vegas Valley</p>
+      <h1>One less thing to worry about.</h1>
+      <p class="lead">
+        We come to your home on a regular schedule and take care of the small upkeep most houses go
+        without: air filters, light bulbs, alarm batteries, leak checks and more. Your home stays in
+        good shape, and you don't have to think about it.
+      </p>
+
+      <div class="cta">
+        <a class="btn btn--gold" href="#plans">See plans and pricing</a>
+        <a class="btn btn--outline" href={site.phoneHref}>
+          <Icon name="phone" size={20} />
+          Call {site.phoneDisplay}
+        </a>
+      </div>
+
+      <ul class="points">
+        {
+          points.map((point) => (
+            <li>
+              <Icon name="check" size={20} />
+              {point}
+            </li>
+          ))
+        }
+      </ul>
+    </div>
+
+    <!-- ------- Sample visit report ------- -->
+    <div class="visual">
+      <div class="sun" aria-hidden="true"></div>
+      <div class="report">
+        <div class="report-head">
+          <p class="report-title">Your visit report</p>
+          <span class="pill">Sample</span>
+        </div>
+        <ul class="rows">
+          {
+            report.map((row) => (
+              <li class={`row row--${row.status}`}>
+                <span class="mark">
+                  {row.status === 'ok' ? <Icon name="check" size={16} /> : null}
+                </span>
+                <span>
+                  {row.item}
+                  {row.note ? <span class="note">{row.note}</span> : null}
+                </span>
+              </li>
+            ))
+          }
+        </ul>
+        <p class="report-foot">Sent to you after every visit, with photos.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Olive hill line, borrowed from the logo -->
+  <svg class="hill" viewBox="0 0 1440 60" preserveAspectRatio="none" aria-hidden="true">
+    <path d="M0 60 C 360 6, 1080 6, 1440 60 Z" fill="#ffffff"></path>
+    <path d="M0 60 C 360 6, 1080 6, 1440 60 C 1080 16, 360 16, 0 60 Z" fill="#587b0b"></path>
+  </svg>
+</section>
+
+<style>
+  .hero {
+    position: relative;
+    overflow: hidden;
+    padding-top: clamp(2.5rem, 6vw, 4.5rem);
+  }
+
+  .grid {
+    display: grid;
+    gap: 3rem;
+    padding-bottom: clamp(4rem, 9vw, 6.5rem);
+  }
+
+  @media (min-width: 60rem) {
+    .grid {
+      grid-template-columns: 1.15fr 0.85fr;
+      align-items: center;
+      gap: 4rem;
+    }
+  }
+
+  /* ------- Copy ------- */
+  .lead {
+    max-width: 36rem;
+    margin-top: 1.5rem;
+    font-size: clamp(1.1875rem, 2vw, 1.375rem);
+    line-height: 1.55;
+    color: var(--navy-muted);
+  }
+
+  .cta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.875rem;
+    margin-top: 2.25rem;
+  }
+
+  .points {
+    display: grid;
+    gap: 0.5rem;
+    margin: 2rem 0 0;
+    padding: 0;
+    list-style: none;
+    font-size: 1rem;
+    font-weight: 600;
+  }
+
+  .points li {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .points :global(svg) {
+    color: var(--olive);
+  }
+
+  /* ------- Report card ------- */
+  .visual {
+    position: relative;
+    max-width: 27rem;
+    width: 100%;
+    justify-self: center;
+  }
+
+  /* Gold sun rising behind the card, as in the logo */
+  .sun {
+    position: absolute;
+    top: -2.5rem;
+    right: -2.5rem;
+    width: 13rem;
+    aspect-ratio: 1;
+    border-radius: 50%;
+    background: var(--gold);
+  }
+
+  .report {
+    position: relative;
+    padding: 1.5rem;
+    border-radius: var(--radius);
+    background: var(--white);
+    box-shadow: var(--shadow);
+  }
+
+  .report-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .report-title {
+    font-family: var(--font-heading);
+    font-size: 1.375rem;
+    font-weight: 650;
+  }
+
+  .pill {
+    padding: 0.2rem 0.7rem;
+    border-radius: 999px;
+    background: var(--cream);
+    font-size: 0.8125rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--navy-muted);
+  }
+
+  .rows {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .row {
+    display: flex;
+    gap: 0.75rem;
+    padding-block: 0.7rem;
+    border-bottom: 1px solid var(--line);
+    font-size: 1rem;
+    font-weight: 600;
+    line-height: 1.4;
+  }
+
+  .mark {
+    display: grid;
+    place-items: center;
+    flex: none;
+    width: 1.5rem;
+    height: 1.5rem;
+    border-radius: 50%;
+    background: var(--olive);
+    color: var(--white);
+  }
+
+  .row--watch .mark {
+    background: var(--gold);
+  }
+
+  .note {
+    display: block;
+    margin-top: 0.15rem;
+    font-size: 0.9375rem;
+    font-weight: 500;
+    color: var(--navy-muted);
+  }
+
+  .report-foot {
+    margin-top: 1rem;
+    font-size: 0.9375rem;
+    color: var(--navy-muted);
+  }
+
+  /* ------- Hill divider ------- */
+  .hill {
+    position: absolute;
+    bottom: -1px;
+    left: 0;
+    width: 100%;
+    height: clamp(1.75rem, 4vw, 3.75rem);
+  }
+</style>

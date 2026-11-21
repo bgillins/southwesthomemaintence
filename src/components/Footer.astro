@@ -1,0 +1,97 @@
+---
+// ------- Footer -------
+// Logo, contact, service area and the plain-language scope statement.
+import { Image } from 'astro:assets';
+import logo from '../assets/brand/logo.png';
+import { site } from '../data/site';
+
+const year = new Date().getFullYear();
+---
+
+<footer class="footer">
+  <div class="wrap grid">
+    <div>
+      <Image src={logo} alt={site.name} width={400} class="logo" />
+      <p class="tagline">{site.tagline}</p>
+    </div>
+
+    <div>
+      <p class="label">Call us</p>
+      <a class="phone" href={site.phoneHref}>{site.phoneDisplay}</a>
+    </div>
+
+    <div>
+      <p class="label">Service area</p>
+      <p>{site.areas.join(' · ')}</p>
+    </div>
+  </div>
+
+  <div class="wrap legal">
+    <p>
+      {site.name} provides routine home maintenance. We are not a licensed contractor and do not
+      perform plumbing, electrical, heating or air-conditioning work. A membership is not a home
+      warranty, service contract or insurance.
+    </p>
+    <p>© {year} {site.name}</p>
+  </div>
+</footer>
+
+<style>
+  .footer {
+    padding-block: 3.5rem 2.5rem;
+    border-top: 1px solid var(--line);
+    font-size: 1.0625rem;
+  }
+
+  .grid {
+    display: grid;
+    gap: 2rem;
+  }
+
+  @media (min-width: 48rem) {
+    .grid {
+      grid-template-columns: 1.4fr 1fr 1fr;
+      gap: 3rem;
+    }
+  }
+
+  .logo {
+    width: auto;
+    height: 4.5rem;
+  }
+
+  .tagline {
+    margin-top: 0.75rem;
+    font-family: var(--font-heading);
+    font-size: 1.25rem;
+    font-weight: 600;
+  }
+
+  .label {
+    margin-bottom: 0.25rem;
+    font-size: 0.875rem;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--olive-dark);
+  }
+
+  .phone {
+    font-size: 1.375rem;
+    font-weight: 700;
+  }
+
+  .legal {
+    display: grid;
+    gap: 0.75rem;
+    margin-top: 2.5rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--line);
+    font-size: 0.9375rem;
+    color: var(--navy-muted);
+  }
+
+  .legal p {
+    max-width: 52rem;
+  }
+</style>

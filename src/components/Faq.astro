@@ -1,0 +1,106 @@
+---
+// ------- Common questions -------
+// Native <details> elements: they open and close without any JavaScript.
+import { site } from '../data/site';
+
+const faqs = [
+  {
+    q: 'Are you a handyman service?',
+    a: "No. We do routine home maintenance: the regular upkeep that keeps a house in good shape. We don't do repairs, remodeling, or plumbing, electrical and air-conditioning work. If your home needs any of that, we can connect you with a licensed professional we trust.",
+  },
+  {
+    q: 'Is this a home warranty?',
+    a: "No. A home warranty is a contract that may pay toward certain repairs after something breaks. Our membership is maintenance: we visit on a schedule to keep things in working order. It doesn't pay for repairs or replacements, and it isn't insurance.",
+  },
+  {
+    q: 'What happens if you find a bigger problem?',
+    a: "We show you what we found, with photos, and explain it in plain language. If it needs a licensed professional, we can refer you to one we trust. You're never obligated to use them, and we don't sell repair work during a visit.",
+  },
+  {
+    q: 'Who comes to my home?',
+    a: "The same technician each visit, so you always know who's at the door. They arrive in uniform with a photo ID, and we let you know before they're on the way.",
+  },
+  {
+    q: 'What areas do you serve?',
+    a: `${site.region.charAt(0).toUpperCase()}${site.region.slice(1)}, including ${site.areas.join(', ')}. If you're nearby and not sure, call us and we'll tell you.`,
+  },
+];
+---
+
+<section class="section section--white" id="faq">
+  <div class="wrap narrow">
+    <div class="section-head">
+      <p class="eyebrow">Common questions</p>
+      <h2>Good to know</h2>
+    </div>
+
+    <div class="list">
+      {
+        faqs.map((faq) => (
+          <details>
+            <summary>{faq.q}</summary>
+            <p>{faq.a}</p>
+          </details>
+        ))
+      }
+    </div>
+  </div>
+</section>
+
+<style>
+  .narrow {
+    max-width: 52rem;
+  }
+
+  .list {
+    border-top: 1px solid var(--line);
+  }
+
+  details {
+    border-bottom: 1px solid var(--line);
+  }
+
+  summary {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1.5rem;
+    padding-block: 1.25rem;
+    font-family: var(--font-heading);
+    font-size: 1.375rem;
+    font-weight: 650;
+    line-height: 1.3;
+    cursor: pointer;
+    list-style: none;
+  }
+
+  summary::-webkit-details-marker {
+    display: none;
+  }
+
+  /* Plus sign that turns into a minus when the answer is open */
+  summary::after {
+    content: '+';
+    flex: none;
+    display: grid;
+    place-items: center;
+    width: 2.25rem;
+    height: 2.25rem;
+    border-radius: 50%;
+    background: var(--cream);
+    font-family: var(--font-body);
+    font-size: 1.5rem;
+    font-weight: 500;
+    line-height: 1;
+  }
+
+  details[open] summary::after {
+    content: '\2212';
+  }
+
+  details p {
+    max-width: 44rem;
+    padding-bottom: 1.5rem;
+    color: var(--navy-muted);
+  }
+</style>

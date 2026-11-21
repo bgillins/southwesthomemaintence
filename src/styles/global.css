@@ -1,0 +1,213 @@
+/* ------- Fonts (self-hosted through Fontsource) ------- */
+@import '@fontsource-variable/fraunces';
+@import '@fontsource-variable/montserrat';
+
+/* ------- Brand tokens ------- */
+:root {
+  /* The four brand colors */
+  --navy: #06243a;
+  --olive: #587b0b;
+  --gold: #eca319;
+  --cream: #f7f3e8;
+
+  /* Supporting shades derived from the brand colors */
+  --white: #ffffff;
+  --navy-muted: #3f5566; /* secondary text on light backgrounds */
+  --olive-dark: #47640a; /* small olive text that needs extra contrast */
+  --gold-dark: #d48e0c; /* hover state for gold buttons */
+  --line: #e3dccb; /* borders on cream and white */
+  --cream-muted: #c9d3da; /* secondary text on navy */
+
+  --font-heading: 'Fraunces Variable', Georgia, 'Times New Roman', serif;
+  --font-body: 'Montserrat Variable', 'Helvetica Neue', Arial, sans-serif;
+
+  --wrap: 70rem;
+  --gutter: clamp(1.125rem, 4vw, 2rem);
+  --section: clamp(3.5rem, 8vw, 6rem);
+  --radius: 1rem;
+  --shadow: 0 1px 2px rgb(6 36 58 / 0.06), 0 12px 32px rgb(6 36 58 / 0.1);
+
+  color-scheme: light;
+}
+
+/* ------- Base ------- */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+  scroll-padding-top: 6rem; /* keeps anchored headings clear of the sticky header */
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--cream);
+  color: var(--navy);
+  font-family: var(--font-body);
+  font-size: 1.125rem; /* 18px base: larger type for easier reading */
+  line-height: 1.65;
+}
+
+h1,
+h2,
+h3 {
+  margin: 0;
+  font-family: var(--font-heading);
+  font-weight: 650;
+  line-height: 1.12;
+  letter-spacing: -0.01em;
+  text-wrap: balance;
+}
+
+h1 {
+  font-size: clamp(2.5rem, 6vw, 4.25rem);
+}
+
+h2 {
+  font-size: clamp(2rem, 4vw, 2.875rem);
+}
+
+h3 {
+  font-size: 1.375rem;
+  line-height: 1.25;
+}
+
+p {
+  margin: 0;
+  text-wrap: pretty;
+}
+
+a {
+  color: inherit;
+}
+
+img,
+svg {
+  display: block;
+  max-width: 100%;
+}
+
+/* Icons keep their size when the text beside them wraps */
+svg {
+  flex: none;
+}
+
+:focus-visible {
+  outline: 3px solid var(--gold);
+  outline-offset: 3px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+}
+
+/* ------- Layout helpers ------- */
+.wrap {
+  width: 100%;
+  max-width: var(--wrap);
+  margin-inline: auto;
+  padding-inline: var(--gutter);
+}
+
+.section {
+  padding-block: var(--section);
+}
+
+.section--white {
+  background: var(--white);
+}
+
+.section--navy {
+  background: var(--navy);
+  color: var(--cream);
+}
+
+.section-head {
+  max-width: 44rem;
+  margin-bottom: clamp(2rem, 5vw, 3.25rem);
+}
+
+.section-head p {
+  margin-top: 1rem;
+  font-size: 1.25rem;
+  color: var(--navy-muted);
+}
+
+.section--navy .section-head p {
+  color: var(--cream-muted);
+}
+
+/* Small uppercase label above headings, echoing "HOME MAINTENANCE" in the logo */
+.eyebrow {
+  margin-bottom: 0.875rem;
+  font-size: 0.875rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  text-wrap: balance;
+  color: var(--olive-dark);
+}
+
+.section--navy .eyebrow {
+  color: var(--gold);
+}
+
+/* ------- Buttons ------- */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  min-height: 3.5rem; /* large tap target */
+  padding: 0.75rem 1.625rem;
+  border: 2px solid transparent;
+  border-radius: 999px;
+  font: inherit;
+  font-weight: 700;
+  line-height: 1.2;
+  text-align: center;
+  text-decoration: none;
+  cursor: pointer;
+  transition:
+    background-color 0.15s,
+    border-color 0.15s,
+    color 0.15s;
+}
+
+.btn--gold {
+  background: var(--gold);
+  color: var(--navy);
+}
+
+.btn--gold:hover {
+  background: var(--gold-dark);
+}
+
+.btn--navy {
+  background: var(--navy);
+  color: var(--cream);
+}
+
+.btn--navy:hover {
+  background: #0d3a5c;
+}
+
+.btn--outline {
+  border-color: var(--navy);
+  color: var(--navy);
+}
+
+.btn--outline:hover {
+  background: var(--navy);
+  color: var(--cream);
+}
+
+.btn--block {
+  width: 100%;
+}
