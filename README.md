@@ -30,3 +30,9 @@ Then open http://localhost:4321. `npm run build` writes the finished site to `di
 - Replace the placeholder phone number in `src/data/site.ts`.
 - Set `formEndpoint` in `src/data/site.ts`. Until then the sign-up form sends nothing and asks visitors to call.
 - Set `site` in `astro.config.mjs` to the live domain.
+
+## Staff portal
+
+The app the techs use (visit checklists, photos, customer reports) is in [`portal/`](portal/README.md).
+It is a separate app with its own `package.json` and its own Vercel project. It reads the
+plans and checklist from `src/data/` here, so those stay the single source of truth.

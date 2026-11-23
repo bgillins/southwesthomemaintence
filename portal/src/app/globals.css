@@ -1,0 +1,102 @@
+/* ------- Fonts (self-hosted, same as the website) ------- */
+@import '@fontsource-variable/fraunces';
+@import '@fontsource-variable/montserrat';
+@import 'tailwindcss';
+
+/* ------- Brand tokens (matches the website's global.css) ------- */
+@theme {
+  --color-navy: #06243a;
+  --color-olive: #587b0b;
+  --color-gold: #eca319;
+  --color-cream: #f7f3e8;
+  --color-navy-muted: #3f5566;
+  --color-olive-dark: #47640a;
+  --color-gold-dark: #d48e0c;
+  --color-line: #e3dccb;
+  --color-olive-tint: #eaf1d8;
+  --color-olive-ink: #33490a;
+  --color-gold-tint: #fdf0d5;
+  --color-gold-ink: #5c3d00;
+  --color-navy-tint: #e8ecef;
+  --color-alert: #b3261e;
+  --color-alert-tint: #fbe9e7;
+  --color-alert-ink: #7a1a14;
+
+  --font-heading: 'Fraunces Variable', Georgia, 'Times New Roman', serif;
+  --font-body: 'Montserrat Variable', 'Helvetica Neue', Arial, sans-serif;
+}
+
+/* ------- Base ------- */
+html {
+  -webkit-text-size-adjust: 100%;
+  -webkit-tap-highlight-color: transparent;
+}
+
+body {
+  background: var(--color-cream);
+  color: var(--color-navy);
+  font-family: var(--font-body);
+  font-size: 1rem;
+  line-height: 1.5;
+}
+
+h1,
+h2,
+h3 {
+  font-family: var(--font-heading);
+  font-weight: 650;
+  line-height: 1.15;
+  letter-spacing: -0.01em;
+}
+
+/* ------- Reusable pieces ------- */
+/* Tap targets are at least 48px tall: techs use this one-handed, sometimes in gloves. */
+@layer components {
+  .btn {
+    @apply inline-flex min-h-12 items-center justify-center gap-2 rounded-full px-5 text-base font-bold transition-colors disabled:opacity-50;
+  }
+  .btn-primary {
+    @apply bg-gold text-navy hover:bg-gold-dark;
+  }
+  .btn-navy {
+    @apply bg-navy text-white hover:bg-navy-muted;
+  }
+  .btn-quiet {
+    @apply border border-line bg-white text-navy hover:bg-navy-tint;
+  }
+  .btn-small {
+    @apply min-h-10 px-4 text-sm;
+  }
+  .card {
+    @apply rounded-2xl border border-line bg-white p-4;
+  }
+  .input {
+    @apply block min-h-12 w-full rounded-xl border border-line bg-white px-3.5 text-base text-navy placeholder:text-navy-muted/60 focus:border-olive focus:outline-2 focus:outline-olive/30;
+  }
+  textarea.input {
+    @apply py-3;
+  }
+  .label {
+    @apply mb-1.5 block text-sm font-semibold text-navy;
+  }
+  .eyebrow {
+    @apply text-xs font-bold uppercase tracking-wider text-olive-dark;
+  }
+  .tag {
+    @apply inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-bold;
+  }
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-olive);
+  outline-offset: 2px;
+}
+
+@media print {
+  .no-print {
+    display: none !important;
+  }
+  body {
+    background: #fff;
+  }
+}
