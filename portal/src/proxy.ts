@@ -8,6 +8,12 @@ import { NextResponse, type NextRequest } from 'next/server';
 import { supabaseAnonKey, supabaseUrl } from '@/lib/env';
 
 export async function proxy(request: NextRequest) {
+  // A fresh deployment with no database connected yet: say so plainly instead
+  // of showing a crash page.
+  if (!supabaseUrl || !supabaseAnonKey) {
+    return new NextResponse('Portal setup is not finished: Supabase is not connected to this deployment yet.', { status: 503 });
+  }
+
   let response = NextResponse.next({ request });
 
   const supabase = createServerClient(supabaseUrl, supabaseAnonKey, {

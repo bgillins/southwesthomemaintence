@@ -12,3 +12,4 @@ tests/.report/
 tests/demo/out/
 .next-test/
 .next-demo/
+test-results/
