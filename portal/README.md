@@ -46,6 +46,7 @@ printed in the terminal instead of sent, so you can test without sending anythin
 | Checklist items, plans, prices | `../src/data/` in the website (copied in automatically) |
 | Which tasks land on which visit | `src/lib/plan.ts` |
 | Email wording | `src/lib/email.ts` |
+| Tests | `tests/` (see Testing below) |
 | The tech's visit screen | `src/app/(app)/visits/[id]/VisitRunner.tsx` |
 | The customer report | `src/app/r/[token]/page.tsx` |
 | Colors and buttons | `src/app/globals.css` |
@@ -61,8 +62,69 @@ apps on it:
 - Every table has row-level security that checks the person is in `shm_portal.staff`.
   Being logged in to another app on the same project gives no access here.
 
-Both migrations in `supabase/migrations/` are already applied. To change the schema,
-add a new numbered file there and run it in the Supabase SQL editor.
+All migrations in `supabase/migrations/` are already applied. To change the schema,
+add a new numbered file there, run it in the Supabase SQL editor, then run
+`npm run test:db:reset` so the test copy matches.
+
+## Testing
+
+One command checks everything:
+
+```bash
+npm run verify
+```
+
+It runs three layers, fastest first:
+
+| Layer | Command | What it proves |
+| --- | --- | --- |
+| Types | `npm run typecheck` | The code is consistent with itself |
+| Logic (40 tests, 2 seconds) | `npm test` | Each plan gets each task the promised number of times a year; Las Vegas time is right across daylight saving; emails are worded and escaped correctly |
+| Whole app (84 tests, 3 minutes) | `npm run test:e2e` | A real browser, sized like an iPhone, drives a production build through every flow, and each step is checked against what was actually saved in the database |
+
+How the whole-app tests stay safe:
+
+- **They never touch live data.** They run against a second schema, `shm_portal_test`,
+  and a second photo bucket, built from the same migration files. The app is pointed
+  there by two environment variables that are only set during tests.
+- **They never send real email.** A small stand-in for Resend (`tests/support/fake-resend.mjs`)
+  receives what the app sends, and the tests read the "inbox" to get sign-in codes and
+  check the report email.
+- **They clean up.** Every test login is `shm-e2e-...@example.com` and is deleted at the
+  end, along with every row and photo in the test copy.
+
+What is covered (`tests/e2e/`):
+
+| File | Covers |
+| --- | --- |
+| `01-auth` | Sign-in by code and by link, wrong and reused codes, strangers get no email, rate limit, security headers |
+| `02-team` | Adding staff, techs kept out of owner pages, switching access off takes effect at once |
+| `03-homes` | Adding, finding and editing homes; equipment, supplies, to-do list; server-side validation |
+| `04-visit` | The full visit: right checklist for the plan, locked until started, photos shrunk and stored, finish rules, report email, failures, lost signal |
+| `05-report` | The customer report with no login; wrong links; no other customer's data; no code injection |
+| `06-schedule` | Today and Schedule show the right visits to the right person at Las Vegas times |
+| `07-access` | The database itself refuses strangers, non-team logins and switched-off staff, with the pages bypassed |
+| `08-phone` | No sideways scrolling, thumb-sized buttons, camera opens, installs to the home screen |
+
+Two more commands, which need a Supabase access token in `SUPABASE_ACCESS_TOKEN`:
+
+- `npm run test:db:reset` rebuilds the test copy from the migration files. This is
+  also the test of the migrations: if the SQL cannot build a database from nothing,
+  it fails here.
+- `npm run test:db:check` compares the live schema with the test copy, column by
+  column and rule by rule. It answers "does the live database still match the repo?"
+
+When a test fails, `tests/.report/index.html` has a screenshot and a step-by-step
+replay of what the browser did.
+
+### Walkthrough video
+
+```bash
+npm run demo:video
+```
+
+Drives the app through a scripted visit (office, tech, customer), records the screen,
+and writes a captioned mp4 to `tests/demo/out/`. Needs `ffmpeg`.
 
 ## Going live on Vercel
 
@@ -70,7 +132,8 @@ add a new numbered file there and run it in the Supabase SQL editor.
 2. Storage tab: connect `supabase-bistre-zebra` to the project. That fills in the
    three Supabase variables.
 3. Add `RESEND_API_KEY`, `EMAIL_FROM` (an address on a domain verified in Resend),
-   `APP_URL` (the portal's public address) and `PORTAL_OWNER_EMAILS`.
+   `EMAIL_REPLY_TO` (where customer replies should land) and `PORTAL_OWNER_EMAILS`.
+   `APP_URL` is only needed if the portal's address is not the one Vercel assigns.
 4. Deploy, then sign in with an owner email. Add the techs on the Team page.
 
 On a phone, open the portal and choose "Add to Home Screen" to use it like an app.

@@ -107,22 +107,28 @@ async function isOpen(supabase: Supabase, visitId: string): Promise<boolean> {
   return data?.status === 'in_progress';
 }
 
+// Hot path: this runs on every tap, so it is one trip to the database.
+// The answer_item function checks the visit is in progress and saves, together.
+// There is no separate "is this person staff?" lookup here on purpose: the
+// database's row-level security does that check itself and saves nothing otherwise.
 export async function updateItem(
   itemId: string,
   visitId: string,
   change: { status?: ItemStatus; note?: string | null },
 ): Promise<ActionResult> {
-  const staff = await requireStaff();
   if (!isUuid(itemId) || !isUuid(visitId)) return { ok: false, error: 'That item could not be found.' };
+  const status = change.status && ['pending', 'done', 'attention', 'na'].includes(change.status) ? change.status : null;
   const supabase = await createClient();
-  if (!(await isOpen(supabase, visitId))) return { ok: false, error: 'Start the visit before filling in the checklist.' };
-
-  const update: Record<string, unknown> = { updated_by: staff.id, updated_at: new Date().toISOString() };
-  if (change.status && ['pending', 'done', 'attention', 'na'].includes(change.status)) update.status = change.status;
-  if (change.note !== undefined) update.note = change.note?.trim() || null;
-
-  const { error } = await supabase.from('visit_items').update(update).eq('id', itemId).eq('visit_id', visitId);
-  return error ? { ok: false, error: error.message } : { ok: true };
+  const { data: saved, error } = await supabase.rpc('answer_item', {
+    p_item: itemId,
+    p_visit: visitId,
+    p_status: status,
+    p_note: change.note ?? null,
+    p_set_note: change.note !== undefined,
+  });
+  if (error) return { ok: false, error: error.message };
+  if (!saved) return { ok: false, error: 'Not saved. The visit is not in progress, or you have been signed out.' };
+  return { ok: true };
 }
 
 // The phone uploads the photo straight to storage, then calls this to record it.

@@ -29,10 +29,21 @@ export async function sendEmail(email: Email): Promise<SendResult> {
   }
 
   try {
-    const response = await fetch('https://api.resend.com/emails', {
+    // RESEND_API_URL is only set by the automated tests, which point it at a
+    // stand-in server so no real email is ever sent during a test run.
+    const endpoint = `${process.env.RESEND_API_URL || 'https://api.resend.com'}/emails`;
+    const response = await fetch(endpoint, {
       method: 'POST',
       headers: { Authorization: `Bearer ${key}`, 'Content-Type': 'application/json' },
-      body: JSON.stringify({ from, to: email.to, subject: email.subject, html: email.html, text: email.text, reply_to: email.replyTo }),
+      body: JSON.stringify({
+        from,
+        to: email.to,
+        subject: email.subject,
+        html: email.html,
+        text: email.text,
+        // Where a customer's reply lands, if different from the sending address.
+        reply_to: email.replyTo ?? process.env.EMAIL_REPLY_TO ?? undefined,
+      }),
     });
     const body = (await response.json().catch(() => ({}))) as { id?: string; message?: string };
     if (!response.ok) return { ok: false, error: body.message ?? `Resend answered ${response.status}` };

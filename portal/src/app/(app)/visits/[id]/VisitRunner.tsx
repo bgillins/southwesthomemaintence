@@ -4,7 +4,7 @@
 // How it works: every tap changes the screen straight away (so it feels instant
 // on a slow signal), then saves in the background. If a save fails, the change
 // is undone and a message says so. Nothing is lost silently.
-import { useRef, useState, useTransition } from 'react';
+import { useEffect, useRef, useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import { addTask, setTaskDone } from '@/app/actions/homes';
 import {
@@ -28,7 +28,7 @@ import { shrinkPhoto } from '@/lib/photo';
 import { READINGS, TASK_MINUTES, VISIT_MINUTES, VISITS_PER_YEAR } from '@/lib/plan';
 import { createClient } from '@/lib/supabase/client';
 import { formatLongDay, formatTime, toLocalInput } from '@/lib/time';
-import type { Customer, Home, HomeTask, ItemStatus, Reading, Staff, Supply, Visit, VisitItem, VisitPhoto, VisitSupply } from '@/lib/types';
+import type { ActionResult, Customer, Home, HomeTask, ItemStatus, Reading, Staff, Supply, Visit, VisitItem, VisitPhoto, VisitSupply } from '@/lib/types';
 
 interface Props {
   visit: Visit;
@@ -64,19 +64,49 @@ export function VisitRunner(props: Props) {
 
   const fail = (text: string) => setMessage({ tone: 'error', text });
 
-  // ------- Checklist -------
-  async function changeItem(item: VisitItem, change: { status?: ItemStatus; note?: string | null }) {
-    const before = items;
-    setItems((list) => list.map((row) => (row.id === item.id ? { ...row, ...change } : row)));
-    const result = await updateItem(item.id, visit.id, change);
-    if (!result.ok) {
-      setItems(before);
+  // ------- Saving -------
+  // Every change goes through here. It counts saves in flight (for the
+  // "Saving…" label), and if a save is refused OR never reaches the server
+  // (no signal), it undoes the change on screen and says so. The screen must
+  // never show something as saved when it is not.
+  const [saving, setSaving] = useState(0);
+  async function save<T extends ActionResult>(action: () => Promise<T>, undo: () => void): Promise<T | null> {
+    setSaving((count) => count + 1);
+    try {
+      const result = await action();
+      if (result.ok) return result;
+      undo();
       fail(result.error);
+    } catch {
+      undo();
+      fail('Not saved: no connection. Check your signal and try again.');
+    } finally {
+      setSaving((count) => count - 1);
     }
+    return null;
+  }
+
+  // Warn before closing the page while something is still being saved.
+  useEffect(() => {
+    if (!saving) return;
+    const warn = (event: BeforeUnloadEvent) => event.preventDefault();
+    window.addEventListener('beforeunload', warn);
+    return () => window.removeEventListener('beforeunload', warn);
+  }, [saving]);
+
+  // ------- Checklist -------
+  function changeItem(item: VisitItem, change: { status?: ItemStatus; note?: string | null }) {
+    // Remember only this item's old values. Undoing must not disturb answers
+    // given to other items while this one was saving.
+    const previous = { status: item.status, note: item.note };
+    const apply = (values: Partial<VisitItem>) => setItems((list) => list.map((row) => (row.id === item.id ? { ...row, ...values } : row)));
+    apply(change);
+    void save(() => updateItem(item.id, visit.id, change), () => apply(change.status === undefined ? { note: previous.note } : { status: previous.status }));
   }
 
   // ------- Photos -------
   async function addPhoto(file: File, itemId: string | null) {
+    setSaving((count) => count + 1);
     try {
       const { blob, width, height } = await shrinkPhoto(file);
       const path = `${visit.id}/${crypto.randomUUID()}.jpg`;
@@ -87,42 +117,33 @@ export function VisitRunner(props: Props) {
       setPhotos((list) => [...list, { id: result.id!, visit_id: visit.id, item_id: itemId, storage_path: path, caption: null, width, height, url: result.url }]);
     } catch (error) {
       fail(`Photo not saved: ${error instanceof Error ? error.message : 'unknown problem'}. Check your signal and try again.`);
+    } finally {
+      setSaving((count) => count - 1);
     }
   }
 
-  async function removePhoto(photo: VisitPhoto) {
-    const before = photos;
+  function removePhoto(photo: VisitPhoto) {
     setPhotos((list) => list.filter((row) => row.id !== photo.id));
-    const result = await deletePhoto(photo.id, visit.id);
-    if (!result.ok) {
-      setPhotos(before);
-      fail(result.error);
-    }
+    void save(() => deletePhoto(photo.id, visit.id), () => setPhotos((list) => [...list, photo]));
   }
 
   // ------- Parts used -------
   async function addSupply(name: string, qty: number) {
-    const result = await addVisitSupply(visit.id, name, qty);
-    if (!result.ok) return fail(result.error);
-    setSupplies((list) => [...list, { id: result.id!, visit_id: visit.id, name: name.trim(), qty }]);
+    const result = await save(() => addVisitSupply(visit.id, name, qty), () => {});
+    if (result) setSupplies((list) => [...list, { id: result.id!, visit_id: visit.id, name: name.trim(), qty }]);
   }
 
-  async function removeSupply(supply: VisitSupply) {
-    const before = supplies;
+  function removeSupply(supply: VisitSupply) {
     setSupplies((list) => list.filter((row) => row.id !== supply.id));
-    const result = await removeVisitSupply(supply.id, visit.id);
-    if (!result.ok) {
-      setSupplies(before);
-      fail(result.error);
-    }
+    void save(() => removeVisitSupply(supply.id, visit.id), () => setSupplies((list) => [...list, supply]));
   }
 
   // ------- Finish -------
   function finish() {
     if (!window.confirm('Finish this visit and email the report to the customer?')) return;
     startTransition(async () => {
-      const result = await completeVisit(visit.id, summary);
-      if (!result.ok) return fail(result.error);
+      const result = await save(() => completeVisit(visit.id, summary), () => {});
+      if (!result) return;
       setMessage({ tone: 'ok', text: result.notice ?? 'Visit finished.' });
       router.refresh();
     });
@@ -130,8 +151,8 @@ export function VisitRunner(props: Props) {
 
   function sendAgain() {
     startTransition(async () => {
-      const result = await resendReport(visit.id);
-      setMessage(result.ok ? { tone: 'ok', text: result.notice ?? 'Sent.' } : { tone: 'error', text: result.error });
+      const result = await save(() => resendReport(visit.id), () => {});
+      if (result) setMessage({ tone: 'ok', text: result.notice ?? 'Sent.' });
     });
   }
 
@@ -246,7 +267,12 @@ export function VisitRunner(props: Props) {
         <div className="sticky top-0 z-20 -mx-4 border-b border-line bg-cream/95 px-4 py-2.5 backdrop-blur">
           <div className="flex items-center justify-between text-sm font-bold">
             <span>{answered} of {items.length} answered</span>
-            {issues ? <span className="text-alert">{issues} to flag</span> : null}
+            <span className="flex items-center gap-3">
+              {issues ? <span className="text-alert">{issues} to flag</span> : null}
+              <span role="status" aria-live="polite" className={saving ? 'text-gold-ink' : 'font-semibold text-navy-muted'}>
+                {saving ? 'Saving…' : 'All saved'}
+              </span>
+            </span>
           </div>
           <div className="mt-1.5 h-2 overflow-hidden rounded-full bg-line" role="progressbar" aria-valuemin={0} aria-valuemax={items.length} aria-valuenow={answered} aria-label="Checklist progress">
             <div className="h-full rounded-full bg-olive transition-all" style={{ width: `${items.length ? (answered / items.length) * 100 : 0}%` }} />
@@ -314,11 +340,10 @@ export function VisitRunner(props: Props) {
                           const next = event.target.checked;
                           setTaskTicks((ticks) => ({ ...ticks, [task.id]: next }));
                           startTransition(async () => {
-                            const result = await setTaskDone(task.id, visit.id, next, null);
-                            if (!result.ok) {
-                              setTaskTicks((ticks) => ({ ...ticks, [task.id]: !next }));
-                              fail(result.error);
-                            }
+                            await save(
+                              () => setTaskDone(task.id, visit.id, next, null),
+                              () => setTaskTicks((ticks) => ({ ...ticks, [task.id]: !next })),
+                            );
                             router.refresh();
                           });
                         }}
@@ -359,10 +384,9 @@ export function VisitRunner(props: Props) {
                   step="any"
                   disabled={!editable}
                   defaultValue={props.readings.find((row) => row.key === reading.key)?.value ?? ''}
-                  onBlur={async (event) => {
+                  onBlur={(event) => {
                     const value = event.target.value === '' ? null : Number(event.target.value);
-                    const result = await saveReading(visit.id, reading.key, value);
-                    if (!result.ok) fail(result.error);
+                    void save(() => saveReading(visit.id, reading.key, value), () => {});
                   }}
                   className="input"
                 />
@@ -410,8 +434,8 @@ export function VisitRunner(props: Props) {
             <textarea id="summary" rows={4} value={summary} onChange={(event) => setSummary(event.target.value)} placeholder="Everything looked good today. I replaced both air filters and…" className="input" />
             <p className="mt-1 text-xs text-navy-muted">Shown at the top of their report. Plain words, like you would say at the door.</p>
           </div>
-          <button type="button" onClick={finish} disabled={busy} className="btn btn-primary w-full">
-            {busy ? 'Finishing…' : 'Finish visit and send report'}
+          <button type="button" onClick={finish} disabled={busy || saving > 0} className="btn btn-primary w-full">
+            {busy ? 'Finishing…' : saving > 0 ? 'Saving your answers…' : 'Finish visit and send report'}
           </button>
           {answered < items.length ? <p className="text-center text-sm text-navy-muted">{items.length - answered} items still need an answer.</p> : null}
         </section>
